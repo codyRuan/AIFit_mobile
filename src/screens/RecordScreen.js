@@ -55,11 +55,6 @@ export const RecordScreen = ({ navigation }) => {
   return (
 
     <SafeAreaView style={styles.container}>
-      {/* <Button
-          title="Refresh"
-          color="#f194ff"
-          onPress={() => get_data(),setLoading(true)}
-        /> */}
       {isLoading ? <ActivityIndicator /> : (
         <SectionList
           sections={WorkoutItem}
@@ -87,7 +82,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#A0522D",
-    // marginHorizontal: 16
   },
   item: {
     backgroundColor: "#FFDEAD",
@@ -96,7 +90,6 @@ const styles = StyleSheet.create({
     padding:12,
     marginVertical: 0.25,
     flexDirection: 'row',
-    // justifyContent: 'space-between',
   },
   header: {
     fontSize: 32,
@@ -104,7 +97,6 @@ const styles = StyleSheet.create({
   },
   content: {
     fontSize: 22,
-    // width: 110,
     alignSelf: 'center',
     flex: 1,   
   },

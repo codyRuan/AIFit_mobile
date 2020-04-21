@@ -16,7 +16,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from "react-native-vector-icons/Ionicons"
 import { LoginScreen, Splash, success } from './src/screens/LoginScreen';
-import { LineUpScreen } from './src/screens/LineUpScreen';
+import { LineUpScreen, LineUpDetails } from './src/screens/LineUpScreen';
 import { RecordScreen } from './src/screens/RecordScreen';
 import { NotificationScreen } from './src/screens/NotificationScreen';
 import { SocietyScreen } from './src/screens/SocietyScreen';
@@ -58,7 +58,7 @@ const TabsScreen = () => (
       inactiveTintColor: 'gray',
     }}
   >
-    <Tabs.Screen name="LineUp" component={LineUpScreen} />
+    <Tabs.Screen name="LineUp" component={LineUpStackScreen} />
     <Tabs.Screen name="Record" component={RecordScreen} />
     <Tabs.Screen name="Notification" component={NotificationScreen} />
     <Tabs.Screen name="Society" component={SocietyScreen} />
@@ -86,10 +86,32 @@ const HomeStackScreen = ({ navigation }) => (
             <Icon name={'ios-person'} size={30} color="gray" />
           </TouchableOpacity>
         ),
+        headerRight: () => (
+          <TouchableOpacity
+            style={{
+              borderWidth: 1,
+              borderColor: 'rgba(0,0,0,0.2)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 50,
+              height: 50,
+              backgroundColor: '#fff',
+              borderRadius: 50,
+            }}
+            onPress={() => navigation.navigate('LineUpStatus')} >
+            <Icon name={'ios-list'} size={30} color="gray" />
+          </TouchableOpacity>
+        ),
       }} />
   </HomeStack.Navigator>
 );
-
+const LineUpStack = createStackNavigator();
+const LineUpStackScreen = () => (
+  <LineUpStack.Navigator headerMode="none" >
+    <LineUpStack.Screen name="LineUp" component={LineUpScreen} />
+    <LineUpStack.Screen name="LineUpDetails" component={LineUpDetails} />
+  </LineUpStack.Navigator>
+);
 const ProfileStack = createStackNavigator();
 const ProfileStackScreen = () => (
   <ProfileStack.Navigator>
@@ -102,6 +124,7 @@ const DrawerScreen = () => (
   <Drawer.Navigator initialRouteName="Home">
     <Drawer.Screen name="Home" component={HomeStackScreen} />
     <Drawer.Screen name="Profile" component={ProfileStackScreen} />
+    <Drawer.Screen name="LineUpStatus" component={LineUpScreen} options={{ title: "LineUpStatus" }} />
   </Drawer.Navigator>
 );
 
@@ -165,7 +188,7 @@ checkLogin = async (setIsLoading, setUserToken) => {
   };
   console.log(details)
 
-  try{
+  try {
     response = await new Promise((res, rej) => {
       fetch('https://ncufit.tk/checklogin/', {
         method: 'POST',
@@ -190,14 +213,14 @@ checkLogin = async (setIsLoading, setUserToken) => {
           console.log("token has died");
           setUserToken(null)
           setIsLoading(false)
-  
+
         }
       }).catch((err) => {
         console.log(err)
         setIsLoading(false)
       }).done();
     })
-  }catch(e){
+  } catch (e) {
     console.log(e)
   }
 }

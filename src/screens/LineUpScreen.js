@@ -1,20 +1,38 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView,
   SectionList, FlatList, ActivityIndicator, Button, Image, TouchableOpacity, Alert
 } from "react-native";
 import { AuthContext } from "../context";
 import AsyncStorage from '@react-native-community/async-storage';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
 
+  // 保存新回调
+  useEffect(() => {
+    savedCallback.current = callback;
+  });
 
-export const LineUpScreen = ({ navigation }) => {
-  const [Queue, setQueue] = useState(null)
-  
+  // 建立 interval
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
+export const LineUpDetails = ({ navigation, route }) => {
+
   async function join_the_queue(part) {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
-    
     id = JSON.parse(id)
     uuid = JSON.parse(uuid)
     let details = {
@@ -34,17 +52,159 @@ export const LineUpScreen = ({ navigation }) => {
       .then((response) => response.json())
       .then((res) => {
         console.log(res.message)
+        Alert.alert('Alert Title', res.message, [{ text: 'OK', onPress: () => { navigation.pop() } },])
       }).done()
   }
-  return (
-    <View style={styles.container}>
-      <View style={styles.num}>
-        <Text style={styles.font}>1</Text>
+  async function leave_the_queue(part) {
+    var id = await AsyncStorage.getItem('@UserStorage:user_id')
+    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+    id = JSON.parse(id)
+    uuid = JSON.parse(uuid)
+    let details = {
+      'user_id': id,
+      'uuid': uuid,
+      'part': part
+    };
+    console.log(details)
+    await fetch('https://ncufit.tk/lineup/leave/', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(details)
+    })
+      .then((response) => response.json())
+      .then((res) => {
+        console.log(res.message)
+        Alert.alert('Alert Title', res.message, [{ text: 'OK', onPress: () => { navigation.pop() } },])
+      }).done()
+  }
+  if (route.params.precedence == 1 && route.params.amount == 1){
+    return (
+      <View>
+        <Button
+          onPress={() => {
+            leave_the_queue(route.params.item),
+              route.params.setLoading(true)
+          }}
+          title="結束排隊!"
+          color="skyblue"
+          accessibilityLabel="Learn more about this purple button"
+        />
+  
       </View>
-      <TouchableOpacity style={[styles.button, styles.num]} onPress={() => join_the_queue("chest")} >
-        <Text style={styles.font}>排chest!</Text>
-      </TouchableOpacity>
-    </View>
+    )
+  }
+  else{
+    return (
+      <View>
+        <Button
+          onPress={() => {
+            join_the_queue(route.params.item),
+              route.params.setLoading(true)
+          }}
+          title="仍要排隊!"
+          color="skyblue"
+          accessibilityLabel="Learn more about this purple button"
+        />
+  
+      </View>
+    )
+  }
+  
+}
+
+export const LineUpScreen = ({ navigation }) => {
+  const [Qstatus, setQstatus] = useState(null)
+  const [isLoading, setLoading] = useState(true);
+  useInterval(() => {
+    get_Qstatus()
+  }, 2000);
+  async function get_Qstatus() {
+    var id = await AsyncStorage.getItem('@UserStorage:user_id')
+    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+
+    id = JSON.parse(id)
+    uuid = JSON.parse(uuid)
+
+    let details = {
+      'user_id': id,
+      'uuid': uuid
+    };
+    await fetch('https://ncufit.tk/lineup/getQstatus/', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(details)
+    })
+      .then((response) => response.json())
+      .then((responseData) => {
+        // console.log(JSON.stringify(responseData))
+        if (Qstatus != responseData) {
+          setQstatus(responseData);
+          setLoading(false)
+        }
+      }).done()
+
+  }
+  const test = (title) => {
+    if (title.precedence == 1 && title.amount == 1) {
+      return (
+        <View style={styles.statsContainer}>
+          <View style={styles.statsBox, styles.statsBoxContainer}>
+
+            <View style={{ flex: 5, backgroundColor: 'powderblue' }}>
+              <Text style={{ fontSize: 30 }}>{title.amount}人</Text>
+            </View>
+
+            <TouchableOpacity style={{ flex: 4, backgroundColor: 'skyblue' }} onPress={() => { navigation.push('LineUpDetails', { item: title.item, amount: title.amount,precedence: title.precedence, setLoading: setLoading }) }}  >
+              <Text style={styles.font}>輪到你了!</Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+      )
+    }
+    else {
+      return (
+        <View style={styles.statsContainer}>
+          <View style={styles.statsBox, styles.statsBoxContainer}>
+
+            <View style={{ flex: 5, backgroundColor: 'powderblue' }}>
+              <Text style={{ fontSize: 30 }}>{title.amount}人</Text>
+            </View>
+
+            <TouchableOpacity style={{ flex: 4, backgroundColor: 'skyblue' }} onPress={() => { navigation.push('LineUpDetails', { item: title.item, amount: title.amount,precedence: title.precedence, setLoading: setLoading }) }}  >
+              <Text style={styles.font}>{title.user_qstatus}</Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+      )
+    }
+
+  }
+  const Item = ({ title }) => (
+    test(title)
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {isLoading ? <ActivityIndicator /> : (
+        <SectionList
+          sections={Qstatus}
+          keyExtractor={(item, index) => item + index}
+          renderItem={({ item }) => <Item title={item} />}
+          renderSectionHeader={({ section: { title } }) => (
+            <Text style={styles.header}>{title}</Text>
+          )}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+    </SafeAreaView>
 
   );
 
@@ -52,35 +212,40 @@ export const LineUpScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    backgroundColor: 'rgba(52, 52, 52, 0.8)',
+    marginHorizontal: 16,
+    backgroundColor: "#FFF",
     flex: 1,
     justifyContent: "space-between",
-  },
-  num: {
-    width: 180,
-    height: 100,
-    backgroundColor: "#7E57C2"
-  },
-  add: {
-    width: 180,
-    height: 100,
-    backgroundColor: "#9575CD"
   },
   font: {
     flex: 1,
     color: 'black',
-    fontSize: 40,
+    fontSize: 30,
     fontWeight: 'bold',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  tmp:{
-    backgroundColor: "#FFDEAD",
-    color: "white",
-    paddingLeft: 30,
-    padding:12,
-    marginVertical: 0.25,
+  statsContainer: {
+    flex: 1,
+    padding: 10,
+    marginVertical: 8
+  },
+  statsBox: {
+    alignItems: "center",
+    flex: 1
+  },
+  statsBoxContainer: {
+    flex: 1,
     flexDirection: 'row',
-  }
+    height: 50,
+    borderBottomColor: "#DFD8C8",
+    borderBottomWidth: StyleSheet.hairlineWidth
+  },
+  header: {
+    fontSize: 32,
+    backgroundColor: "#fff"
+  },
+  title: {
+    fontSize: 24
+  },
 });
