@@ -1,3 +1,5 @@
 rootProject.name = 'NCUFit_mobile'
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+include ':react-native-push-notification' //default +
+project(':react-native-push-notification').projectDir = file('../node_modules/react-native-push-notification/android') //default +
 include ':app'
