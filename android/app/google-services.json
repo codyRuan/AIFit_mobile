@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "432871382439",
+    "firebase_url": "https://ncufitmobile.firebaseio.com",
+    "project_id": "ncufitmobile",
+    "storage_bucket": "ncufitmobile.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432871382439:android:3072f844d3d7dc53e96a82",
+        "android_client_info": {
+          "package_name": "com.ncufit_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "432871382439-98f4gkc469ddp1umnnaivq7e3aqr56gp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClfWd9Tdx47Lrsm_Z4HTGnHkkn-r9y7Os"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "432871382439-98f4gkc469ddp1umnnaivq7e3aqr56gp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -20,7 +20,7 @@ export const RecordScreen = ({ navigation }) => {
 
   useEffect(() => {
     get_data();
-  });
+  },[]);
 
   async function get_data() {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')

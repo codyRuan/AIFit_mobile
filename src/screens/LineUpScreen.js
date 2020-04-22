@@ -80,7 +80,7 @@ export const LineUpDetails = ({ navigation, route }) => {
         Alert.alert('Alert Title', res.message, [{ text: 'OK', onPress: () => { navigation.pop() } },])
       }).done()
   }
-  if (route.params.precedence == 1 && route.params.amount == 1){
+  if (route.params.precedence == 1){
     return (
       <View>
         <Button
