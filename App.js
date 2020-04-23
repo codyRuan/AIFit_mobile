@@ -24,6 +24,8 @@ import { Profile } from './src/screens/Profile';
 import AsyncStorage from '@react-native-community/async-storage';
 import { AuthContext } from "./src/context"
 import { Browser } from "./src/browser";
+import {getDeviceToken,getRemoteMessaging} from "./src/screens/NotificationScreen";
+
 const Stack = createStackNavigator();
 const Tabs = createBottomTabNavigator();
 const TabsScreen = () => (
@@ -258,6 +260,8 @@ export default () => {
       console.log("test")
 
     }
+    getDeviceToken();
+    //getRemoteMessaging();
     // setTimeout(() => {
     //   setIsLoading(false);
     // }, 2000) //timeout after 1000 ms

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Alert, StyleSheet, Button } from "react-native";
 import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
-
+import AsyncStorage from '@react-native-community/async-storage';
 
 PushNotification.configure({
   // (required) Called when a remote or local notification is opened or received
@@ -13,50 +13,77 @@ PushNotification.configure({
   requestPermissions: true
 });
 
+export async function getRemoteMessaging() {
+  messaging().onMessage(async remoteMessage => {
+    //Alert.alert(JSON.parse(JSON.stringify(remoteMessage.notification.title)), JSON.parse(JSON.stringify(remoteMessage.notification.body)));
+    console.log(remoteMessage.data)
+    handleButtonPress(remoteMessage.data.body,remoteMessage.data.title);
+  });
+}
+
+function handleButtonPress(BigText,Title){
+  PushNotification.localNotification({
+    autoCancel: true,
+    bigText: BigText,
+    subText: "SubText",
+    title: Title,
+    message: "Message",
+    vibrate: true,
+    vibration: 300,
+    playSound: true,
+    soundName: 'default',
+    actions: '["Yes", "No"]',
+  })
+}
+
+export async function getDeviceToken() {
+  await messaging()
+    .getToken()
+    .then(token => {
+      saveTokenToDatabase(token);
+    });
+}
+
+async function saveTokenToDatabase(token) {
+  console.log("device token:"+token);
+  var id = await AsyncStorage.getItem('@UserStorage:user_id')
+  id = JSON.parse(id)
+  
+  let details = {
+    'user_id': id,
+    'token': token,
+  }
+  console.log(JSON.stringify(details))
+  await fetch('https://ncufit.tk/notification/getToken/', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(details)
+    })
+      .then((response) => response.json())
+      .then((responseData) => {
+        console.log(JSON.stringify(responseData))
+      })
+}
+
 // JSON.stringify(remoteMessage.notification.body)   JSON.parse(JSON.stringify(remoteMessage.notification.body))
 export const NotificationScreen = ({ navigation }) => {
   const [BigText, setBigText] = useState(null);
   const [SubText, setSubText] = useState(null);
   const [Title, setTitle] = useState(null);
   const [Message, setMessage] = useState(null);
-  let d = new Date()
   
-  const SendScheduleLocalMessage = () => {
-    PushNotification.localNotificationSchedule({
-      
-      message: "My Notification Message", // (required)
-      date: d,
-    });
-    console.log(d)
-  }
-
-  const handleButtonPress = () => {
-    PushNotification.localNotification({
-      autoCancel: true,
-      bigText: BigText,
-      subText: "SubText",
-      title: Title,
-      message: "Message",
-      vibrate: true,
-      vibration: 300,
-      playSound: true,
-      soundName: 'default',
-      actions: '["Yes", "No"]',
-      fireDate :d,
-    })
-  }
-
-  async function getRemoteMessaging() {
-    messaging().onMessage(async remoteMessage => {
-      //Alert.alert(JSON.parse(JSON.stringify(remoteMessage.notification.title)), JSON.parse(JSON.stringify(remoteMessage.notification.body)));
-      handleButtonPress(remoteMessage.notification.title, remoteMessage.notification.body);
-    });
-  }
-  async function registerAppWithFCM() {
-    await messaging().registerDeviceForRemoteMessages();
-  }
+  // const SendScheduleLocalMessage = () => {
+    
+  //   let a = PushNotification.localNotificationSchedule({
+  //     message: "My Notification Message", // (required)
+  //     date: new Date(),
+  //   });
+  //   console.log(a)
+  // }
   useEffect(() => {
-    registerAppWithFCM();
     getRemoteMessaging();
     // PushNotification.configure({
     //   // (optional) Called when Token is generated (iOS and Android)
@@ -79,8 +106,7 @@ export const NotificationScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Text>Press a button to trigger the notification</Text>
       <View style={{ marginTop: 20, paddingDown: 30 }}>
-        <Button title={'Local Push Notification'} onPress={handleButtonPress} />
-        <Button title={'Send Local Schedule message'} onPress={SendScheduleLocalMessage} />
+        <Button title={'Local Push Notification'} onPress={() => handleButtonPress} />
       </View>
     </View>
   )
