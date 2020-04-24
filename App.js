@@ -261,7 +261,7 @@ export default () => {
 
     }
     getDeviceToken();
-    //getRemoteMessaging();
+    getRemoteMessaging();
     // setTimeout(() => {
     //   setIsLoading(false);
     // }, 2000) //timeout after 1000 ms
