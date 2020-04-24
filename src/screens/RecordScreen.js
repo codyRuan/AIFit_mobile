@@ -25,15 +25,13 @@ export const RecordScreen = ({ navigation }) => {
   async function get_data() {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
-    
     id = JSON.parse(id)
     uuid = JSON.parse(uuid)
-
     let details = {
       'user_id': id,
       'uuid': uuid
     };
-    console.log(details)
+
     await fetch('https://ncufit.tk/record/history_api/', {
       method: 'POST',
       headers: {

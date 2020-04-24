@@ -24,7 +24,7 @@ import { Profile } from './src/screens/Profile';
 import AsyncStorage from '@react-native-community/async-storage';
 import { AuthContext } from "./src/context"
 import { Browser } from "./src/browser";
-import {getDeviceToken,getRemoteMessaging} from "./src/screens/NotificationScreen";
+import {getDeviceToken,getRemoteMessaging,checkAndroidNotificationPermission} from "./src/screens/NotificationScreen";
 
 const Stack = createStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -260,6 +260,7 @@ export default () => {
       console.log("test")
 
     }
+    checkAndroidNotificationPermission();
     getDeviceToken();
     getRemoteMessaging();
     // setTimeout(() => {
