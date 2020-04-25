@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert, StyleSheet, Button } from "react-native";
+import { View, Text, Alert, StyleSheet, Button, ActivityIndicator } from "react-native";
 import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-community/async-storage';
 import RNAndroidNotificationPermission from 'react-native-android-notification-permission';
+import { ListItem } from 'react-native-elements'
+
+const list = [
+  {
+    name: 'Amy Farha',
+    avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
+    subtitle: 'Vice President'
+  },
+  {
+    name: 'Chris Jackson',
+    avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
+    subtitle: 'Vice Chairman'
+  },
+
+]
 
 PushNotification.configure({
   // (required) Called when a remote or local notification is opened or received
@@ -81,7 +96,7 @@ export const NotificationScreen = ({ navigation }) => {
   const [BigText, setBigText] = useState(null);
   const [SubText, setSubText] = useState(null);
   const [Title, setTitle] = useState(null);
-  const [Message, setMessage] = useState(null);
+  const [MessageList, setMessageList] = useState(null);
   const [isLoading, setLoading] = useState(true);
 
   async function loadDBmessage() {
@@ -92,8 +107,8 @@ export const NotificationScreen = ({ navigation }) => {
     let details = {
       'user_id': id,
       'uuid': uuid
-  };
-  
+    };
+
     await fetch('https://ncufit.tk/notification/getMessage/', {
       method: 'POST',
       headers: {
@@ -104,8 +119,8 @@ export const NotificationScreen = ({ navigation }) => {
     })
       .then((response) => response.json())
       .then((responseData) => {
-        console.log(JSON.stringify(responseData.message))
-        console.log(JSON.stringify(responseData.message[0]))
+        console.log(JSON.stringify(responseData))
+        setMessageList(responseData)
       })
       .finally(() => setLoading(false));
   }
@@ -130,12 +145,23 @@ export const NotificationScreen = ({ navigation }) => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text>Press a button to trigger the notification</Text>
-      <View style={{ marginTop: 20, paddingDown: 30 }}>
-        <Button title={'Local Push Notification'} onPress={() => handleButtonPress} />
-        <Button title={'Get DB Notification'} onPress={() => loadDBmessage} />
-      </View>
+    <View>
+      {isLoading ? <ActivityIndicator /> : (
+        <View>
+          {
+            MessageList.map((l, i) => (
+              <ListItem
+                key={i}
+                //leftAvatar={{ source: { uri: l.avatar_url } }}
+                title={l.datetime}
+                subtitle={l.body}
+                leftIcon={{ name: 'sms' }}
+                bottomDivider
+              />
+            ))
+          }
+        </View>
+      )}
     </View>
   )
 }
