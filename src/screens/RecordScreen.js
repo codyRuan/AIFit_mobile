@@ -23,7 +23,6 @@ export const RecordScreen = ({ navigation }) => {
       'user_id': id,
       'uuid': uuid
     };
-
     await fetch('https://ncufit.tk/record/history_api/', {
       method: 'POST',
       headers: {
@@ -40,57 +39,50 @@ export const RecordScreen = ({ navigation }) => {
       .finally(() => setLoading(false));
   }
 
-
-
   return (
-    <SafeAreaView>
-      <ScrollView>
-        {isLoading ? <ActivityIndicator /> : (
-          <View>
-            {
-              WorkoutItem.map((l, i) => (
-                <ListItem
-                  key={i}
-                  //leftAvatar={{ source: { uri: l.avatar_url } }}
-                  title={
-                    <Text style={styles.header}>{l.date}</Text>
-                  }
-                  subtitle={
-                    <View>
-                      <View style={styles.titlestyle}>
-                        <Text style={[styles.titletextstyle, { color: '#0000CC' }]}>耗時</Text>
-                        <Text style={[styles.titletextstyle, { color: '#5500FF' }]}>項目</Text>
-                        <Text style={[styles.titletextstyle, { color: '#9900FF' }]}>組數</Text>
-                        <Text style={[styles.titletextstyle, { color: '#FF00FF' }]}>次數</Text>
-                      </View>
-                      {
-                        l.data.map((d, i) => (
-                          <ListItem
-                            key={i}
-                            title={
-                              <View style={styles.subtitleView}>
-                                <Text style={[styles.title, { color: '#0000CC' }]}>10min</Text>
-                                <Text style={[styles.title, { color: '#5500FF' }]}>{d.item}</Text>
-                                <Text style={[styles.title, { color: '#9900FF' }]}>{d.group}</Text>
-                                <Text style={[styles.title, { color: '#FF00FF' }]}>{d.times}</Text>
-                              </View>
-                            }
-
-                          />
-                        ))
-                      }
+    <ScrollView>
+      {isLoading ? <ActivityIndicator /> : (
+        <View>
+          {
+            WorkoutItem.map((l, i) => (
+              <ListItem
+                key={i}
+                //leftAvatar={{ source: { uri: l.avatar_url } }}
+                title={
+                  <Text style={styles.header}>{l.date}</Text>
+                }
+                subtitle={
+                  <View>
+                    <View style={styles.titlestyle}>
+                      <Text style={[styles.titletextstyle, { color: '#0000CC' }]}>耗時</Text>
+                      <Text style={[styles.titletextstyle, { color: '#5500FF' }]}>項目</Text>
+                      <Text style={[styles.titletextstyle, { color: '#9900FF' }]}>組數</Text>
+                      <Text style={[styles.titletextstyle, { color: '#FF00FF' }]}>次數</Text>
                     </View>
-                  }
-
-                />
-              ))
-            }
-          </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+                    {
+                      l.data.map((d, i) => (
+                        <ListItem
+                          key={i}
+                          title={
+                            <View style={styles.subtitleView}>
+                              <Text style={[styles.title, { color: '#0000CC' }]}>10min</Text>
+                              <Text style={[styles.title, { color: '#5500FF' }]}>{d.item}</Text>
+                              <Text style={[styles.title, { color: '#9900FF' }]}>{d.group}</Text>
+                              <Text style={[styles.title, { color: '#FF00FF' }]}>{d.times}</Text>
+                            </View>
+                          }
+                        />
+                      ))
+                    }
+                  </View>
+                }
+              />
+            ))
+          }
+        </View>
+      )}
+    </ScrollView>
   )
-
 }
 
 styles = StyleSheet.create({
