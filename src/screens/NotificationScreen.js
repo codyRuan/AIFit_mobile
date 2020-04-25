@@ -6,20 +6,6 @@ import AsyncStorage from '@react-native-community/async-storage';
 import RNAndroidNotificationPermission from 'react-native-android-notification-permission';
 import { ListItem } from 'react-native-elements'
 
-const list = [
-  {
-    name: 'Amy Farha',
-    avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg',
-    subtitle: 'Vice President'
-  },
-  {
-    name: 'Chris Jackson',
-    avatar_url: 'https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg',
-    subtitle: 'Vice Chairman'
-  },
-
-]
-
 PushNotification.configure({
   // (required) Called when a remote or local notification is opened or received
   onNotification: function (notification) {
@@ -36,7 +22,6 @@ export async function checkAndroidNotificationPermission() {
 
 export async function getRemoteMessaging() {
   messaging().onMessage(async remoteMessage => {
-    //Alert.alert(JSON.parse(JSON.stringify(remoteMessage.notification.title)), JSON.parse(JSON.stringify(remoteMessage.notification.body)));
     console.log(remoteMessage.data)
     handleButtonPress(remoteMessage.data.body, remoteMessage.data.title);
   });
@@ -90,8 +75,6 @@ async function saveTokenToDatabase(token) {
 }
 
 
-
-// JSON.stringify(remoteMessage.notification.body)   JSON.parse(JSON.stringify(remoteMessage.notification.body))
 export const NotificationScreen = ({ navigation }) => {
   const [BigText, setBigText] = useState(null);
   const [SubText, setSubText] = useState(null);
@@ -99,7 +82,12 @@ export const NotificationScreen = ({ navigation }) => {
   const [MessageList, setMessageList] = useState(null);
   const [isLoading, setLoading] = useState(true);
 
-  async function loadDBmessage() {
+
+  useEffect(() => {
+    loadDBMessage();
+  }, []);
+
+  async function loadDBMessage() {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
     id = JSON.parse(id)
@@ -108,7 +96,6 @@ export const NotificationScreen = ({ navigation }) => {
       'user_id': id,
       'uuid': uuid
     };
-
     await fetch('https://ncufit.tk/notification/getMessage/', {
       method: 'POST',
       headers: {
@@ -125,24 +112,50 @@ export const NotificationScreen = ({ navigation }) => {
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => {
-    loadDBmessage();
-    // PushNotification.configure({
-    //   // (optional) Called when Token is generated (iOS and Android)
-    //   onRegister: function (token) {
-    //     console.log('TOKEN:', token)
-    //   },
-    //   // (required) Called when a remote or local notification is opened or received
-    //   onNotification: function (notification) {
-    //     console.log('REMOTE NOTIFICATION ==>', notification)
-    //     // process the notification here
-    //   },
-    //   // Android only: GCM or FCM Sender ID
-    //   senderID: '256218572662',
-    //   popInitialNotification: true,
-    //   requestPermissions: true
-    // })
-  }, []);
+  function deleteMessageAlert(dt) {
+    Alert.alert(
+      "warning",
+      "Are you sure to delete the message on " + dt + "?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "SURE", onPress: () => deleteMessage(dt) }
+      ],
+      { cancelable: false }
+    );
+  }
+
+  async function deleteMessage(dt) {
+    var id = await AsyncStorage.getItem('@UserStorage:user_id')
+    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+    id = JSON.parse(id)
+    uuid = JSON.parse(uuid)
+    let details = {
+      'user_id': id,
+      'uuid': uuid,
+      'datetime': dt,
+    };
+    await fetch('https://ncufit.tk/notification/deleteMessage/', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(details)
+    })
+      .catch((error) => {
+        Alert.alert("Delete failed")
+      })
+      .then((response) => response.json())
+      .then((responseData) => {
+        Alert.alert("Delete successfully!", responseData)
+      })
+
+      .finally(() => loadDBMessage());
+  }
 
   return (
     <View>
@@ -157,6 +170,8 @@ export const NotificationScreen = ({ navigation }) => {
                 subtitle={l.body}
                 leftIcon={{ name: 'sms' }}
                 bottomDivider
+                onLongPress={() => { deleteMessageAlert(l.datetime) }}
+                onPress={() => { loadDBMessage() }}
               />
             ))
           }
