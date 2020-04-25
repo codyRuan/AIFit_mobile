@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView,
-  SectionList, FlatList, ActivityIndicator, Button,
+  ScrollView, ActivityIndicator,
 } from "react-native";
 import AsyncStorage from '@react-native-community/async-storage';
-
-const Item = ({ title }) => (
-  <View style={styles.item}>
-    <Text style={[styles.content, { color: '#0000CC'}]}>{title.time}</Text>
-    <Text style={[styles.content, { color: '#5500FF'}]}>{title.item}</Text>
-    <Text style={[styles.content, { color: '#9900FF'}]}>{title.group}</Text>
-    <Text style={[styles.content, { color: '#FF00FF'}]}>{title.times}</Text>
-  </View>
-);
+import { ListItem, Button } from 'react-native-elements'
 
 export const RecordScreen = ({ navigation }) => {
   const [WorkoutItem, setWorkoutItem] = useState(null);
@@ -20,7 +12,7 @@ export const RecordScreen = ({ navigation }) => {
 
   useEffect(() => {
     get_data();
-  },[]);
+  }, []);
 
   async function get_data() {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
@@ -51,56 +43,91 @@ export const RecordScreen = ({ navigation }) => {
 
 
   return (
+    <SafeAreaView>
+      <ScrollView>
+        {isLoading ? <ActivityIndicator /> : (
+          <View>
+            {
+              WorkoutItem.map((l, i) => (
+                <ListItem
+                  key={i}
+                  //leftAvatar={{ source: { uri: l.avatar_url } }}
+                  title={
+                    <Text style={styles.header}>{l.date}</Text>
+                  }
+                  subtitle={
+                    <View>
+                      <View style={styles.titlestyle}>
+                        <Text style={[styles.titletextstyle, { color: '#0000CC' }]}>耗時</Text>
+                        <Text style={[styles.titletextstyle, { color: '#5500FF' }]}>項目</Text>
+                        <Text style={[styles.titletextstyle, { color: '#9900FF' }]}>組數</Text>
+                        <Text style={[styles.titletextstyle, { color: '#FF00FF' }]}>次數</Text>
+                      </View>
+                      {
+                        l.data.map((d, i) => (
+                          <ListItem
+                            key={i}
+                            title={
+                              <View style={styles.subtitleView}>
+                                <Text style={[styles.title, { color: '#0000CC' }]}>10min</Text>
+                                <Text style={[styles.title, { color: '#5500FF' }]}>{d.item}</Text>
+                                <Text style={[styles.title, { color: '#9900FF' }]}>{d.group}</Text>
+                                <Text style={[styles.title, { color: '#FF00FF' }]}>{d.times}</Text>
+                              </View>
+                            }
 
-    <SafeAreaView style={styles.container}>
-      {isLoading ? <ActivityIndicator /> : (
-        <SectionList
-          sections={WorkoutItem}
-          keyExtractor={(item, index, group) => index}
-          renderItem={({ item }) => <Item title={item} />}
-          renderSectionHeader={({ section: { date } }) => (
-            <View>
-              <Text style={styles.header}>{date}</Text>
-              <View style={styles.item}>
-                <Text style={[styles.title, { color: '#0000CC'}]}>時間</Text>
-                <Text style={[styles.title, { color: '#5500FF'}]}>項目</Text>
-                <Text style={[styles.title, { color: '#9900FF'}]}>組數</Text>
-                <Text style={[styles.title, { color: '#FF00FF'}]}>次數</Text>
-              </View>
-            </View>
-          )}
-        />
-      )}
+                          />
+                        ))
+                      }
+                    </View>
+                  }
+
+                />
+              ))
+            }
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   )
 
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#A0522D",
-  },
-  item: {
-    backgroundColor: "#FFDEAD",
-    color: "white",
-    paddingLeft: 30,
-    padding:12,
-    marginVertical: 0.25,
+styles = StyleSheet.create({
+  dateView: {
     flexDirection: 'row',
-  },
-  header: {
-    fontSize: 32,
-    backgroundColor: "#CD853F"
-  },
-  content: {
-    fontSize: 22,
-    alignSelf: 'center',
-    flex: 1,   
-  },
-  title:{
     flex: 1,
-    fontSize: 24,
+    paddingLeft: 5,
+  },
+  titlestyle: {
+    flexDirection: 'row',
+    paddingLeft: 35,
+    paddingRight: 25,
+  },
+  titletextstyle: {
+    fontSize: 18,
+    flex: 1,
+  },
+  subtitleView: {
+    flexDirection: 'row',
+    paddingLeft: 20,
+    paddingTop: 5
+  },
+  ratingImage: {
+    height: 19.21,
+    width: 100
+  },
+  ratingText: {
+    paddingLeft: 10,
+    color: 'grey'
+  },
+  title: {
+    flex: 1,
+    fontSize: 18,
     width: 110,
   },
-});
+  header: {
+    fontSize: 24,
+    paddingBottom: 10,
+  },
+})

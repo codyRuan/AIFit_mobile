@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert, StyleSheet, Button, ActivityIndicator } from "react-native";
+import {
+  View, Text, Alert, StyleSheet, Button,
+  ActivityIndicator, ScrollView
+} from "react-native";
 import messaging from '@react-native-firebase/messaging';
 import PushNotification from 'react-native-push-notification';
 import AsyncStorage from '@react-native-community/async-storage';
 import RNAndroidNotificationPermission from 'react-native-android-notification-permission';
-import { ListItem } from 'react-native-elements'
+import { ListItem, Overlay } from 'react-native-elements';
 
 PushNotification.configure({
   // (required) Called when a remote or local notification is opened or received
@@ -24,8 +27,21 @@ export async function getRemoteMessaging() {
   messaging().onMessage(async remoteMessage => {
     console.log(remoteMessage.data)
     handleButtonPress(remoteMessage.data.body, remoteMessage.data.title);
+    pushOverlay();
   });
 }
+
+// export function pushOverlay() {
+//   var isVisible=true;
+//   return(
+//   <Overlay
+//     isVisible={true}
+//     //onBackdropPress={() => { isVisible = false }}
+//   >
+//     <Text>Hello from Overlay!</Text>
+//   </Overlay>
+//   )
+// }
 
 function handleButtonPress(BigText, Title) {
   PushNotification.localNotification({
@@ -81,7 +97,6 @@ export const NotificationScreen = ({ navigation }) => {
   const [Title, setTitle] = useState(null);
   const [MessageList, setMessageList] = useState(null);
   const [isLoading, setLoading] = useState(true);
-
 
   useEffect(() => {
     loadDBMessage();
@@ -158,7 +173,7 @@ export const NotificationScreen = ({ navigation }) => {
   }
 
   return (
-    <View>
+    <ScrollView>
       {isLoading ? <ActivityIndicator /> : (
         <View>
           {
@@ -177,7 +192,7 @@ export const NotificationScreen = ({ navigation }) => {
           }
         </View>
       )}
-    </View>
+    </ScrollView>
   )
 }
 
