@@ -25,8 +25,8 @@ export async function checkAndroidNotificationPermission() {
 
 export async function getRemoteMessaging() {
   messaging().onMessage(async remoteMessage => {
-    console.log(remoteMessage.data)
-    handleButtonPress(remoteMessage.data.body, remoteMessage.data.title);
+    console.log(remoteMessage)
+    handleButtonPress(remoteMessage.notification.body, remoteMessage.notification.title);
   });
 }
 
@@ -120,7 +120,7 @@ export const NotificationScreen = ({ navigation }) => {
     })
       .then((response) => response.json())
       .then((responseData) => {
-        console.log(JSON.stringify(responseData))
+        console.log("update notification ಥ_ಥ")
         setMessageList(responseData)
       })
       .finally(() => setLoading(false));
@@ -181,7 +181,10 @@ export const NotificationScreen = ({ navigation }) => {
                 key={i}
                 //leftAvatar={{ source: { uri: l.avatar_url } }}
                 title={l.datetime}
-                subtitle={l.body}
+                subtitle={<View>
+                            <Text>{l.title}</Text>
+                            <Text>{l.body}</Text>
+                          </View>}
                 leftIcon={{ name: 'sms' }}
                 bottomDivider
                 onLongPress={() => { deleteMessageAlert(l.datetime) }}

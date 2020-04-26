@@ -13,4 +13,4 @@ const getremotemessage = () => {
     });
 }
 
-AppRegistry.registerComponent(appName, () => App,getremotemessage);
+AppRegistry.registerComponent(appName, () => App);

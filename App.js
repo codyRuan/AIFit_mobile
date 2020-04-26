@@ -9,7 +9,7 @@ import {
   Button,
   TextInput,
 } from 'react-native';
-
+import messaging from '@react-native-firebase/messaging';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -261,6 +261,9 @@ export default () => {
     checkAndroidNotificationPermission();
     getDeviceToken();
     getRemoteMessaging();
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Message handled in the background!', remoteMessage);
+    });
     // setTimeout(() => {
     //   setIsLoading(false);
     // }, 2000) //timeout after 1000 ms
