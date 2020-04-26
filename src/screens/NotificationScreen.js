@@ -27,7 +27,6 @@ export async function getRemoteMessaging() {
   messaging().onMessage(async remoteMessage => {
     console.log(remoteMessage.data)
     handleButtonPress(remoteMessage.data.body, remoteMessage.data.title);
-    pushOverlay();
   });
 }
 
@@ -137,7 +136,7 @@ export const NotificationScreen = ({ navigation }) => {
           onPress: () => console.log("Cancel Pressed"),
           style: "cancel"
         },
-        { text: "SURE", onPress: () => deleteMessage(dt) }
+        { text: "DELETE", onPress: () => deleteMessage(dt) }
       ],
       { cancelable: false }
     );
@@ -177,7 +176,7 @@ export const NotificationScreen = ({ navigation }) => {
       {isLoading ? <ActivityIndicator /> : (
         <View>
           {
-            MessageList.map((l, i) => (
+            MessageList.reverse().map((l, i) => (
               <ListItem
                 key={i}
                 //leftAvatar={{ source: { uri: l.avatar_url } }}

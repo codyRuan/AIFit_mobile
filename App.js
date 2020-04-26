@@ -188,7 +188,6 @@ checkLogin = async (setIsLoading, setUserToken) => {
     'user_id': id,
     'uuid': uuid
   };
-  console.log(details)
 
   try {
     response = await new Promise((res, rej) => {
@@ -215,7 +214,6 @@ checkLogin = async (setIsLoading, setUserToken) => {
           console.log("token has died");
           setUserToken(null)
           setIsLoading(false)
-
         }
       }).catch((err) => {
         console.log(err)

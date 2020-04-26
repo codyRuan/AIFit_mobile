@@ -32,7 +32,7 @@ export const Browser = ({ navigation, route }) => {
     if (!loading) {
       console.log(url.indexOf(REDIRECT_URI))
       if (url.indexOf(REDIRECT_URI) !== -1) {
-        const code = qs.parse(url.split('?')[1]);
+        //const code = qs.parse(url.split('?')[1]);
         fetch(URI)
           .then((response) => response.json())
           .then((responseJson) => {
@@ -68,6 +68,7 @@ export const Browser = ({ navigation, route }) => {
       source={{ uri: URI }}
       onShouldStartLoadWithRequest={this.onNavigationStateChange}
       onNavigationStateChange={this.onNavigationStateChange}
+      thirdPartyCookiesEnabled={false}
     />
     )
   }

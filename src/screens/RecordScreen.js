@@ -4,7 +4,7 @@ import {
   ScrollView, ActivityIndicator,
 } from "react-native";
 import AsyncStorage from '@react-native-community/async-storage';
-import { ListItem, Button } from 'react-native-elements'
+import { ListItem, Button, ButtonGroup } from 'react-native-elements'
 
 export const RecordScreen = ({ navigation }) => {
   const [WorkoutItem, setWorkoutItem] = useState(null);
@@ -45,38 +45,44 @@ export const RecordScreen = ({ navigation }) => {
         <View>
           {
             WorkoutItem.map((l, i) => (
-              <ListItem
-                key={i}
-                //leftAvatar={{ source: { uri: l.avatar_url } }}
-                title={
-                  <Text style={styles.header}>{l.date}</Text>
-                }
-                subtitle={
-                  <View>
-                    <View style={styles.titlestyle}>
-                      <Text style={[styles.titletextstyle, { color: '#0000CC' }]}>耗時</Text>
-                      <Text style={[styles.titletextstyle, { color: '#5500FF' }]}>項目</Text>
-                      <Text style={[styles.titletextstyle, { color: '#9900FF' }]}>組數</Text>
-                      <Text style={[styles.titletextstyle, { color: '#FF00FF' }]}>次數</Text>
+              <View>
+                <ListItem
+                  key={i}
+                  //leftAvatar={{ source: { uri: l.avatar_url } }}
+                  title={
+                    <Text style={styles.header}>{l.date}</Text>
+                  }
+                  chevron
+                />
+                <ListItem
+                  title={
+                    <View>
+                      <View style={styles.titlestyle}>
+                        <Text style={[styles.titletextstyle, { color: '#0000CC' }]}>耗時</Text>
+                        <Text style={[styles.titletextstyle, { color: '#5500FF' }]}>項目</Text>
+                        <Text style={[styles.titletextstyle, { color: '#9900FF' }]}>組數</Text>
+                        <Text style={[styles.titletextstyle, { color: '#FF00FF' }]}>次數</Text>
+                      </View>
+                      {
+                        l.data.map((d, j) => (
+                          <ListItem
+                            key={j}
+                            title={
+                              <View style={styles.subtitleView}>
+                                <Text style={[styles.title, { color: '#0000CC' }]}>10min</Text>
+                                <Text style={[styles.title, { color: '#5500FF' }]}>{d.item}</Text>
+                                <Text style={[styles.title, { color: '#9900FF' }]}>{d.group}</Text>
+                                <Text style={[styles.title, { color: '#FF00FF' }]}>{d.times}</Text>
+                              </View>
+                            }
+                            topDivider
+                          />
+                        ))
+                      }
                     </View>
-                    {
-                      l.data.map((d, i) => (
-                        <ListItem
-                          key={i}
-                          title={
-                            <View style={styles.subtitleView}>
-                              <Text style={[styles.title, { color: '#0000CC' }]}>10min</Text>
-                              <Text style={[styles.title, { color: '#5500FF' }]}>{d.item}</Text>
-                              <Text style={[styles.title, { color: '#9900FF' }]}>{d.group}</Text>
-                              <Text style={[styles.title, { color: '#FF00FF' }]}>{d.times}</Text>
-                            </View>
-                          }
-                        />
-                      ))
-                    }
-                  </View>
-                }
-              />
+                  }
+                />
+              </View>
             ))
           }
         </View>
@@ -97,6 +103,7 @@ styles = StyleSheet.create({
     paddingRight: 25,
   },
   titletextstyle: {
+    paddingBottom: 15,
     fontSize: 18,
     flex: 1,
   },
@@ -120,6 +127,6 @@ styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    paddingBottom: 10,
+    
   },
 })
