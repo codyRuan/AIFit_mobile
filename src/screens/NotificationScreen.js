@@ -25,7 +25,7 @@ export async function checkAndroidNotificationPermission() {
 
 export async function getRemoteMessaging() {
   messaging().onMessage(async remoteMessage => {
-    console.log(remoteMessage)
+    console.log(remoteMessage.notification)
     handleButtonPress(remoteMessage.notification.body, remoteMessage.notification.title);
   });
 }
@@ -42,13 +42,13 @@ export async function getRemoteMessaging() {
 //   )
 // }
 
-function handleButtonPress(BigText, Title) {
+function handleButtonPress(Message, Title) {
   PushNotification.localNotification({
     autoCancel: true,
-    bigText: BigText,
-    subText: "SubText",
+    //bigText: "BigText",
+    //subText: SubText,
     title: Title,
-    message: "Message",
+    message: Message,
     vibrate: true,
     vibration: 300,
     playSound: true,
@@ -180,11 +180,14 @@ export const NotificationScreen = ({ navigation }) => {
               <ListItem
                 key={i}
                 //leftAvatar={{ source: { uri: l.avatar_url } }}
-                title={l.datetime}
+                title={<View style={{flexDirection: 'row'}}>
+                  <Text>{l.datetime}</Text>
+                  <Text style={{paddingLeft:35, color:'pink'}}>{l.from}</Text>
+                </View>}
                 subtitle={<View>
-                            <Text>{l.title}</Text>
-                            <Text>{l.body}</Text>
-                          </View>}
+                  <Text>{l.title}</Text>
+                  <Text>{l.body}</Text>
+                </View>}
                 leftIcon={{ name: 'sms' }}
                 bottomDivider
                 onLongPress={() => { deleteMessageAlert(l.datetime) }}
