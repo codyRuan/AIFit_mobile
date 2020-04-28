@@ -71,10 +71,10 @@ export const LoginScreen = ({ navigation }) => {
 
       <View style={styles.bottmContainer}>
         <TouchableOpacity style={[styles.button, { backgroundColor: '#53423D' }]}
-          onPress={() => navigation.push(
+          onPress={() => {navigation.push(
             'Browser',
             { callback: this.callbackFunction, }
-          )} >
+          )}} >
           <Text style={styles.buttonText}>Login via NCU portal</Text>
         </TouchableOpacity>
       </View>
