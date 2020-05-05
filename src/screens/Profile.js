@@ -37,12 +37,14 @@ postData = (data) => {
 export const Profile = ({ navigation }) => {
   const [isLoading, setLoading] = useState(true);
   const [imgdata, setimgdata] = useState(null);
+  const [userSID, setuserSID] = useState(null);
+  const [userUN, setuserUN] = useState(null);
   const { signOut } = React.useContext(AuthContext);
   useEffect(() => {
     if (isLoading) {
       get_profile();
     }
-  });
+  },[]);
   function convertFile(file) {
     return new Promise((resolve, reject) => {
       // 建立FileReader物件
@@ -58,8 +60,14 @@ export const Profile = ({ navigation }) => {
   async function get_profile() {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+    var info = await AsyncStorage.getItem('@UserStorage:user_info')
     id = JSON.parse(id)
     uuid = JSON.parse(uuid)
+    info = JSON.parse(info)
+    setuserSID(id)
+    setuserUN(info.chinese_name)
+    
+    
     let details = {
       'user_id': id,
       'uuid': uuid
@@ -115,7 +123,7 @@ export const Profile = ({ navigation }) => {
         let source = res;
         setimgdata(source.data)
         var data = new FormData();
-        data.append('user_id', '106502521');
+        data.append('user_id', userUN);
         data.append('img', {
           'uri': source.uri,
           'type': source.type,
@@ -148,8 +156,8 @@ export const Profile = ({ navigation }) => {
           </View>
 
           <View style={styles.infoContainer}>
-            <Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>{'楊景豐'}</Text>
-            <Text style={[styles.text, { color: "#AEB5BC", fontSize: 14 }]}>{'106502521'}</Text>
+            <Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>{userUN}</Text>
+            <Text style={[styles.text, { color: "#AEB5BC", fontSize: 14 }]}>{userSID}</Text>
           </View>
 
           <View style={styles.statsContainer}>

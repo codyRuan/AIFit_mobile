@@ -57,21 +57,61 @@ export const LineUpDetails = ({ navigation, route }) => {
       }).done()
   }
   return (
-    
+
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View >
-          <View style={{ paddingLeft: 20, paddingTop: 10, width: 150 }}>
+      <ScrollView showsVerticalScrollIndicator={true}>
+
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+          <View style={{ paddingTop: 35 }}>
             <Text style={{ fontSize: 50 }}>{route.params.data.item}</Text>
           </View>
-          
-        </View>
-      
 
-        </ScrollView>
+          <View style={{ width: 200, paddingLeft: 70, paddingTop: 48 }}>
+            <Button
+              onPress={() => {
+                leave_the_queue(route.params.data.item)
+
+              }}
+
+              title="結束訓練"
+              color="skyblue"
+              accessibilityLabel="Learn more about this purple button"
+            />
+          </View>
+        </View>
+
+        <View style={{ paddingLeft: 70, paddingTop: 65 }}>
+          <View style={{ width: 200 }}>
+            <Input
+              placeholder='EX 6'
+              label='次數'
+              onChangeText={text => setTimes(text)}
+              value={Times}
+            />
+          </View>
+        </View>
+        <View style={{ paddingLeft: 70, paddingTop: 40 }}>
+          <View style={{ width: 200 }}>
+            <Input
+              placeholder='EX 6'
+              label='組數'
+              onChangeText={text => setGroup(text)}
+              value={Group}
+            /></View>
+        </View>
+
+
+
+
+      </ScrollView>
+
+
+
+
 
     </SafeAreaView>
-    
+
   )
 
 }
@@ -285,14 +325,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   item: {
-    position: "absolute",
-    left: 20,
-    top: 10,
-    width: 100,
-    height: 100,
+    paddingLeft: 20,
+    paddingTop: 10,
+    width: 150
+  }
 
-    flexDirection: 'row'
-  },
+  ,
   times: {
     position: "absolute",
     top: 70,
