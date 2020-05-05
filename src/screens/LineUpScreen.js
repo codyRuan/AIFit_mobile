@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView,
-  SectionList, FlatList, ActivityIndicator, Button, Image, TouchableOpacity, Alert
+  SectionList, FlatList, ActivityIndicator, Image, TouchableOpacity, Alert, ScrollView
 } from "react-native";
-import { AuthContext } from "../context";
 import AsyncStorage from '@react-native-community/async-storage';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import CountDown from 'react-native-countdown-component';
+import { Button, ListItem, Input } from 'react-native-elements'
 function useInterval(callback, delay) {
   const savedCallback = useRef();
 
@@ -29,32 +27,8 @@ function useInterval(callback, delay) {
 }
 
 export const LineUpDetails = ({ navigation, route }) => {
-  const [countdowntime, setcountdowntime] = useState(null)
-  async function join_the_queue(part) {
-    var id = await AsyncStorage.getItem('@UserStorage:user_id')
-    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
-    id = JSON.parse(id)
-    uuid = JSON.parse(uuid)
-    let details = {
-      'user_id': id,
-      'uuid': uuid,
-      'part': part
-    };
-    console.log(details)
-    await fetch('https://ncufit.tk/lineup/join/', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(details)
-    })
-      .then((response) => response.json())
-      .then((res) => {
-        console.log(res.message)
-        Alert.alert('Alert Title', res.message, [{ text: 'OK', onPress: () => { navigation.pop() } },])
-      }).done()
-  }
+  const [Times, setTimes] = React.useState(0);
+  const [Group, setGroup] = React.useState(0);
   async function leave_the_queue(part) {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
@@ -63,7 +37,9 @@ export const LineUpDetails = ({ navigation, route }) => {
     let details = {
       'user_id': id,
       'uuid': uuid,
-      'part': part
+      'part': part,
+      'group': Group,
+      'times': Times
     };
     console.log(details)
     await fetch('https://ncufit.tk/lineup/leave/', {
@@ -80,117 +56,23 @@ export const LineUpDetails = ({ navigation, route }) => {
         Alert.alert('Alert Title', res.message, [{ text: 'OK', onPress: () => { navigation.pop() } },])
       }).done()
   }
-  async function start_workout(part) {
-    var id = await AsyncStorage.getItem('@UserStorage:user_id')
-    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
-    id = JSON.parse(id)
-    uuid = JSON.parse(uuid)
-    let details = {
-      'user_id': id,
-      'uuid': uuid,
-      'part': part
-    };
-    console.log(details)
-    await fetch('https://ncufit.tk/lineup/StartWorkout/', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(details)
-    })
-      .then((response) => response.json())
-      .then((res) => {
-        console.log(res.message)
-        Alert.alert('Alert Title', res.message, [{ text: 'OK', onPress: () => { navigation.pop() } },])
-      }).done()
-  }
-  useEffect(() => {
-    get_countdown(route.params.item)
-  }, []);
-  async function get_countdown(part) {
-    var id = await AsyncStorage.getItem('@UserStorage:user_id')
-    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+  return (
+    
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View >
+          <View style={{ paddingLeft: 20, paddingTop: 10, width: 150 }}>
+            <Text style={{ fontSize: 50 }}>{route.params.data.item}</Text>
+          </View>
+          
+        </View>
+      
 
-    id = JSON.parse(id)
-    uuid = JSON.parse(uuid)
+        </ScrollView>
 
-    let details = {
-      'user_id': id,
-      'uuid': uuid,
-      'part': part
-    };
-    await fetch('https://ncufit.tk/lineup/GetTimer/', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(details)
-    })
-      .then((response) => response.json())
-      .then((responseData) => {
-        if (countdowntime != responseData) {
-          var tmp = parseInt(responseData.message, 10)
-          setcountdowntime(tmp);
-          console.log(tmp)
-        }
-      }).done()
-
-  }
-  if (route.params.precedence == 1) {
-    return (
-      <View>
-        {countdowntime ? (<CountDown
-          until={countdowntime}
-          size={30}
-          onFinish={() => alert('Finished')}
-          digitStyle={{ backgroundColor: '#FFF' }}
-          digitTxtStyle={{ color: '#1CC625' }}
-          timeToShow={['M', 'S']}
-          timeLabels={{ m: 'MM', s: 'SS' }}
-        />) : (
-            <ActivityIndicator />
-          )}
-
-        <Button
-          onPress={() => {
-            start_workout(route.params.item),
-              route.params.setLoading(true)
-          }}
-          title="開始使用!"
-          color="skyblue"
-          accessibilityLabel="Learn more about this purple button"
-        />
-        <Button
-          onPress={() => {
-            leave_the_queue(route.params.item),
-              route.params.setLoading(true)
-          }}
-          title="結束排隊!"
-          color="skyblue"
-          accessibilityLabel="Learn more about this purple button"
-        />
-
-      </View>
-    )
-  }
-  else {
-    return (
-      <View>
-        <Button
-          onPress={() => {
-            join_the_queue(route.params.item),
-              route.params.setLoading(true)
-          }}
-          title="仍要排隊!"
-          color="skyblue"
-          accessibilityLabel="Learn more about this purple button"
-        />
-
-      </View>
-    )
-  }
+    </SafeAreaView>
+    
+  )
 
 }
 
@@ -221,80 +103,213 @@ export const LineUpScreen = ({ navigation }) => {
     })
       .then((response) => response.json())
       .then((responseData) => {
-        // console.log(JSON.stringify(responseData))
-        if (Qstatus != responseData) {
-          setQstatus(responseData);
-          setLoading(false)
-        }
+        //console.log(JSON.stringify(responseData))
+        setQstatus(responseData);
+        setLoading(false)
+
       }).done()
-
   }
-  const test = (title) => {
-    if (title.precedence == 1) {
-      return (
-        <View style={styles.statsContainer}>
-          <View style={styles.statsBox, styles.statsBoxContainer}>
+  const LineUpAction = (data) => {
+    async function join_the_queue(part) {
+      var id = await AsyncStorage.getItem('@UserStorage:user_id')
+      var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+      id = JSON.parse(id)
+      uuid = JSON.parse(uuid)
+      let details = {
+        'user_id': id,
+        'uuid': uuid,
+        'part': part
+      };
+      console.log(details)
+      await fetch('https://ncufit.tk/lineup/join/', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(details)
+      })
+        .then((response) => response.json())
+        .then((res) => {
+          console.log(res.message)
+          Alert.alert('Alert Title', res.message, [{ text: 'OK' },])
+        }).done()
+    }
+    async function leave_the_queue(part) {
+      var id = await AsyncStorage.getItem('@UserStorage:user_id')
+      var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+      id = JSON.parse(id)
+      uuid = JSON.parse(uuid)
+      let details = {
+        'user_id': id,
+        'uuid': uuid,
+        'part': part
+      };
+      console.log(details)
+      await fetch('https://ncufit.tk/lineup/leave/', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(details)
+      })
+        .then((response) => response.json())
+        .then((res) => {
+          console.log(res.message)
+          Alert.alert('Alert Title', res.message, [{ text: 'OK' },])
+        }).done()
+    }
+    async function start_workout(part) {
+      var id = await AsyncStorage.getItem('@UserStorage:user_id')
+      var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+      id = JSON.parse(id)
+      uuid = JSON.parse(uuid)
+      let details = {
+        'user_id': id,
+        'uuid': uuid,
+        'part': part
+      };
+      console.log(details)
+      await fetch('https://ncufit.tk/lineup/StartWorkout/', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(details)
+      })
+        .then((response) => response.json())
+        .then((res) => {
+          console.log(res.message)
+        }).done()
+    }
+    var item = JSON.parse(JSON.stringify(data.item))
+    var amount = JSON.parse(JSON.stringify(data.amount))
+    var precedence = JSON.parse(JSON.stringify(data.precedence))
 
-            <View style={{ flex: 5, backgroundColor: 'powderblue' }}>
-              <Text style={{ fontSize: 30 }}>{title.amount}人</Text>
-            </View>
+    if (data.precedence == 1) {
+      Alert.alert(
+        item,
+        "到你了!",
+        [
+          { text: "開始訓練", onPress: () => { navigation.push('LineUpDetails', { data }), start_workout(item) } },
+          {
+            text: "離開列隊",
+            onPress: () => leave_the_queue(item),
+            style: "cancel"
+          }
+        ],
+      );
+    }
 
-            <TouchableOpacity style={{ flex: 4, backgroundColor: 'skyblue' }} onPress={() => { navigation.push('LineUpDetails', { item: title.item, amount: title.amount, precedence: title.precedence, setLoading: setLoading }) }}  >
-              <Text style={styles.font}>輪到你了!</Text>
-            </TouchableOpacity>
-
-          </View>
-        </View>
-      )
+    else if (data.precedence != -1 && data.precedence != 0) {
+      Alert.alert(
+        item,
+        (precedence - 1).toString(),
+        [
+          { text: "離開列隊", onPress: () => leave_the_queue(item) },
+          {
+            text: "取消",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel"
+          }
+        ],
+      );
     }
     else {
-      return (
-        <View style={styles.statsContainer}>
-          <View style={styles.statsBox, styles.statsBoxContainer}>
 
-            <View style={{ flex: 5, backgroundColor: 'powderblue' }}>
-              <Text style={{ fontSize: 30 }}>{title.amount}人</Text>
-            </View>
-
-            <TouchableOpacity style={{ flex: 4, backgroundColor: 'skyblue' }} onPress={() => { navigation.push('LineUpDetails', { item: title.item, amount: title.amount, precedence: title.precedence, setLoading: setLoading }) }}  >
-              <Text style={styles.font}>{title.user_qstatus}</Text>
-            </TouchableOpacity>
-
-          </View>
-        </View>
-      )
+      Alert.alert(
+        item,
+        amount.toString(),
+        [
+          { text: "仍要排隊", onPress: () => join_the_queue(item) },
+          {
+            text: "取消",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel"
+          }
+        ],
+      );
     }
-
   }
-  const Item = ({ title }) => (
-    test(title)
-  );
+  const lineup_title = (title) => {
+    return (
+      <View>
+        <Text style={styles.header}>{title}</Text>
+      </View>
 
+    )
+  }
   return (
-    <SafeAreaView style={styles.container}>
+    <ScrollView>
       {isLoading ? <ActivityIndicator /> : (
-        <SectionList
-          sections={Qstatus}
-          keyExtractor={(item, index) => item + index}
-          renderItem={({ item }) => <Item title={item} />}
-          renderSectionHeader={({ section: { title } }) => (
-            <Text style={styles.header}>{title}</Text>
-          )}
-          showsVerticalScrollIndicator={false}
-        />
+        <View>{
+          Qstatus.map((first, i) => (
+            <View>
+              <ListItem
+                key={i}
+                title={
+                  <View>
+                    {lineup_title(first.title)}
+                    {
+                      first.data.map((second, j) => (
+                        <ListItem
+                          key={j}
+                          title={
+                            <View style={styles.subtitleView}>
+                              <Text style={[styles.font, { color: '#000080' }]}>{second.amount}人</Text>
+
+                              <TouchableOpacity style={[styles.title]} onPress={() => { LineUpAction(second) }}  >
+                                <Text style={[styles.font, { color: '#000080' }]}>{second.user_qstatus}</Text>
+                              </TouchableOpacity>
+                            </View>
+                          }
+                          bottomDivider />
+                      ))}
+                  </View>
+                }
+              />
+            </View>
+          ))
+        }
+        </View>
       )}
-    </SafeAreaView>
-
+    </ScrollView>
   );
-
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    backgroundColor: "#FFF",
     flex: 1,
-    justifyContent: "space-between",
+    backgroundColor: 'white',
+  },
+  item: {
+    position: "absolute",
+    left: 20,
+    top: 10,
+    width: 100,
+    height: 100,
+
+    flexDirection: 'row'
+  },
+  times: {
+    position: "absolute",
+    top: 70,
+    width: 200,
+    height: 200,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: 'row',
+  },
+  group: {
+    position: "absolute",
+    top: 170,
+    width: 200,
+    height: 200,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: 'row',
   },
   font: {
     flex: 1,
@@ -303,28 +318,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  statsContainer: {
-    flex: 1,
-    padding: 10,
-    marginVertical: 8
-  },
-  statsBox: {
-    alignItems: "center",
-    flex: 1
-  },
-  statsBoxContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    height: 50,
-    borderBottomColor: "#DFD8C8",
-    borderBottomWidth: StyleSheet.hairlineWidth
+    width: 110,
   },
   header: {
     fontSize: 32,
     backgroundColor: "#fff"
   },
-  title: {
-    fontSize: 24
+  subtitleView: {
+    flexDirection: 'row',
+    paddingLeft: 20,
+    paddingTop: 5
   },
+  title: {
+    flex: 1,
+    fontSize: 18,
+    width: 110,
+  },
+
 });

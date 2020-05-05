@@ -27,7 +27,8 @@ postData = (data) => {
     body: data,
     credentials: 'same-origin',
   }).then((response) => response.json()
-  ).then((resdata) => {console.log(resdata)
+  ).then((resdata) => {
+    console.log(resdata)
   }).done();
 
 }
@@ -36,6 +37,7 @@ postData = (data) => {
 export const Profile = ({ navigation }) => {
   const [isLoading, setLoading] = useState(true);
   const [imgdata, setimgdata] = useState(null);
+  const { signOut } = React.useContext(AuthContext);
   useEffect(() => {
     if (isLoading) {
       get_profile();
@@ -133,9 +135,10 @@ export const Profile = ({ navigation }) => {
             <View style={styles.profileImage}>
               <Image source={{ uri: 'data:image/png;base64,' + imgdata, }} style={styles.image} resizeMode="center"></Image>
             </View>
-            <View style={styles.dm}>
-              <MaterialIcons name="chat" size={18} color="#DFD8C8"></MaterialIcons>
-            </View>
+            <TouchableOpacity onPress={() => signOut()} style={styles.dm}  >
+              <MaterialIcons name="chat" size={18} color="#DFD8C8" style={{ marginTop: 6, marginLeft: 2 }}></MaterialIcons>
+            </TouchableOpacity>
+
             <View style={styles.active}></View>
             <View style={styles.add}>
               <TouchableOpacity onPress={() => selectFile()} style={styles.button}  >
@@ -145,7 +148,7 @@ export const Profile = ({ navigation }) => {
           </View>
 
           <View style={styles.infoContainer}>
-            <Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>{'106502521'}</Text>
+            <Text style={[styles.text, { fontWeight: "200", fontSize: 36 }]}>{'楊景豐'}</Text>
             <Text style={[styles.text, { color: "#AEB5BC", fontSize: 14 }]}>{'106502521'}</Text>
           </View>
 

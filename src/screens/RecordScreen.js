@@ -1,18 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import {
   View, Text, StyleSheet, SafeAreaView,
   ScrollView, ActivityIndicator,
 } from "react-native";
 import AsyncStorage from '@react-native-community/async-storage';
 import { ListItem, Button, ButtonGroup } from 'react-native-elements'
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
 
+  // 保存新回调
+  useEffect(() => {
+    savedCallback.current = callback;
+  });
+
+  // 建立 interval
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
 export const RecordScreen = ({ navigation }) => {
   const [WorkoutItem, setWorkoutItem] = useState(null);
   const [isLoading, setLoading] = useState(true);
 
-  useEffect(() => {
+ 
+  useInterval(() => {
     get_data();
-  }, []);
+  }, 2000);
 
   async function get_data() {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
