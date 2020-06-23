@@ -29,7 +29,8 @@ function useInterval(callback, delay) {
 export const LineUpDetails = ({ navigation, route }) => {
   const [Times, setTimes] = React.useState(0);
   const [Group, setGroup] = React.useState(0);
-
+  const [ALLtrain, setALLtrain] = React.useState(null);
+  const [isLoading, setLoading] = useState(true);
   async function leave_the_queue(part) {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
@@ -70,7 +71,7 @@ export const LineUpDetails = ({ navigation, route }) => {
     let details = {
       'user_id': id,
       'uuid': uuid,
-      'part':part
+      'part': part
     };
     await fetch('https://ncufit.tk/counting/getcurrentset/', {
       method: 'POST',
@@ -85,13 +86,15 @@ export const LineUpDetails = ({ navigation, route }) => {
         console.log(JSON.stringify(responseData))
         setTimes(responseData.times)
         setGroup(responseData.group)
+        setALLtrain(responseData.all)
+        setLoading(false)
       }).done()
   }
   return (
 
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={true}>
-
+      {isLoading ? <ActivityIndicator /> : (<ScrollView showsVerticalScrollIndicator={true}>
+        
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
           <View style={{ paddingTop: 35 }}>
@@ -148,22 +151,30 @@ export const LineUpDetails = ({ navigation, route }) => {
                   <Text style={{ paddingBottom: 15, fontSize: 18, flex: 1 }}>次數</Text>
                   <Text style={{ paddingBottom: 15, fontSize: 18, flex: 1 }}>重量(LBS)</Text>
                 </View>
-                <ListItem
-                  title={
-                    <View style={styles.subtitleView}>
-                      <Text style={{ flex: 1, fontSize: 18, width: 110, }}>{Group}</Text>
-                      <Text style={{ flex: 1, fontSize: 18, width: 110, }}>{Times}</Text>
-                      <Text style={{ flex: 1, fontSize: 18, width: 110, }}>20</Text>
-                    </View>
+                <View>
+                  {
+                    ALLtrain.map((d, j) => (
+                      <ListItem
+                        key={j}
+                        title={
+                          <View style={styles.subtitleView}>
+                            <Text style={{ flex: 1, fontSize: 18, width: 110, }}>{d.group}</Text>
+                            <Text style={{ flex: 1, fontSize: 18, width: 110, }}>{d.times}</Text>
+                            <Text style={{ flex: 1, fontSize: 18, width: 110, }}>20</Text>
+                          </View>
+                        }
+                        topDivider
+                      />
+                    ))
                   }
-                  topDivider
-                />
-                
+                </View>
+
               </View>
             }
           />
         </View>
-      </ScrollView>
+      </ScrollView>)}
+      
     </SafeAreaView>
   )
 }
