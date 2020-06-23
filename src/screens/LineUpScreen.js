@@ -29,6 +29,7 @@ function useInterval(callback, delay) {
 export const LineUpDetails = ({ navigation, route }) => {
   const [Times, setTimes] = React.useState(0);
   const [Group, setGroup] = React.useState(0);
+
   async function leave_the_queue(part) {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
@@ -53,7 +54,37 @@ export const LineUpDetails = ({ navigation, route }) => {
       .then((response) => response.json())
       .then((res) => {
         console.log(res.message)
-        Alert.alert('Alert Title', res.message, [{ text: 'OK', onPress: () => { navigation.pop() } },])
+        Alert.alert(' ', res.message, [{ text: 'OK', onPress: () => { navigation.pop() } },])
+      }).done()
+  }
+
+  useInterval(() => {
+    get_ts(route.params.data.item)
+  }, 1000);
+
+  async function get_ts(part) {
+    var id = await AsyncStorage.getItem('@UserStorage:user_id')
+    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+    id = JSON.parse(id)
+    uuid = JSON.parse(uuid)
+    let details = {
+      'user_id': id,
+      'uuid': uuid,
+      'part':part
+    };
+    await fetch('https://ncufit.tk/counting/getcurrentset/', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(details)
+    })
+      .then((response) => response.json())
+      .then((responseData) => {
+        console.log(JSON.stringify(responseData))
+        setTimes(responseData.times)
+        setGroup(responseData.group)
       }).done()
   }
   return (
@@ -80,8 +111,7 @@ export const LineUpDetails = ({ navigation, route }) => {
             />
           </View>
         </View>
-
-        <View style={{ paddingLeft: 70, paddingTop: 65 }}>
+        {/* <View style={{ paddingLeft: 70, paddingTop: 65 }}>
           <View style={{ width: 200 }}>
             <Input
               placeholder='EX 6'
@@ -99,29 +129,53 @@ export const LineUpDetails = ({ navigation, route }) => {
               onChangeText={text => setGroup(text)}
               value={Group}
             /></View>
+        </View> */}
+        <View style={{ paddingTop: 30 }}>
+          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ fontSize: 30 }}>第{Group}組重量20LBS的次數</Text>
+            <View style={{ paddingTop: 15 }}>
+              <Text style={{ fontSize: 35 }}>{Times}</Text>
+            </View>
+          </View>
         </View>
 
-
-
-
+        <View >
+          <ListItem
+            title={
+              <View>
+                <View style={{ flexDirection: 'row', paddingLeft: 35, paddingRight: 25 }}>
+                  <Text style={{ paddingBottom: 15, fontSize: 18, flex: 1 }}>組別</Text>
+                  <Text style={{ paddingBottom: 15, fontSize: 18, flex: 1 }}>次數</Text>
+                  <Text style={{ paddingBottom: 15, fontSize: 18, flex: 1 }}>重量(LBS)</Text>
+                </View>
+                <ListItem
+                  title={
+                    <View style={styles.subtitleView}>
+                      <Text style={{ flex: 1, fontSize: 18, width: 110, }}>{Group}</Text>
+                      <Text style={{ flex: 1, fontSize: 18, width: 110, }}>{Times}</Text>
+                      <Text style={{ flex: 1, fontSize: 18, width: 110, }}>20</Text>
+                    </View>
+                  }
+                  topDivider
+                />
+                
+              </View>
+            }
+          />
+        </View>
       </ScrollView>
-
-
-
-
-
     </SafeAreaView>
-
   )
-
 }
 
 export const LineUpScreen = ({ navigation }) => {
   const [Qstatus, setQstatus] = useState(null)
   const [isLoading, setLoading] = useState(true);
+  const [TimerIsOn, setTimerIsOn] = useState(false);
   useInterval(() => {
     get_Qstatus()
   }, 1000);
+
   async function get_Qstatus() {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
@@ -172,7 +226,7 @@ export const LineUpScreen = ({ navigation }) => {
         .then((response) => response.json())
         .then((res) => {
           console.log(res.message)
-          Alert.alert('Alert Title', res.message, [{ text: 'OK' },])
+          Alert.alert(' ', res.message, [{ text: 'OK' },])
         }).done()
     }
     async function leave_the_queue(part) {
@@ -197,7 +251,7 @@ export const LineUpScreen = ({ navigation }) => {
         .then((response) => response.json())
         .then((res) => {
           console.log(res.message)
-          Alert.alert('Alert Title', res.message, [{ text: 'OK' },])
+          Alert.alert(' ', res.message, [{ text: 'OK' },])
         }).done()
     }
     async function start_workout(part) {
@@ -210,7 +264,6 @@ export const LineUpScreen = ({ navigation }) => {
         'uuid': uuid,
         'part': part
       };
-      console.log(details)
       await fetch('https://ncufit.tk/lineup/StartWorkout/', {
         method: 'POST',
         headers: {
@@ -224,6 +277,7 @@ export const LineUpScreen = ({ navigation }) => {
           console.log(res.message)
         }).done()
     }
+
     var item = JSON.parse(JSON.stringify(data.item))
     var amount = JSON.parse(JSON.stringify(data.amount))
     var precedence = JSON.parse(JSON.stringify(data.precedence))
@@ -273,13 +327,37 @@ export const LineUpScreen = ({ navigation }) => {
       );
     }
   }
-  const lineup_title = (title) => {
-    return (
-      <View>
-        <Text style={styles.header}>{title}</Text>
-      </View>
+  const lineup_title = (first) => {
 
-    )
+    var cd = parseInt(JSON.parse(JSON.stringify(first.data[0].countdown)), 10)
+    var pd = parseInt(JSON.parse(JSON.stringify(first.data[0].precedence)), 10)
+    var item = JSON.parse(JSON.stringify(first.data[0].item))
+    if (pd == 1) {
+      return (
+        <View style={{ flexDirection: 'row' }}>
+          <Text style={styles.header}>{first.title}</Text>
+          <View style={{ paddingLeft: 180 }}>
+            <CountDown
+              until={cd}
+              size={15}
+              // onFinish={() =>  alert(item, '你已被移出隊伍', [{ text: "ok", style: "cancel" }])}
+              digitStyle={{ backgroundColor: '#FFF' }}
+              // digitTxtStyle={{ color: '#1CC625' }}
+              timeToShow={['M', 'S']}
+              timeLabels={{ m: null, s: null }}
+              showSeparator
+            />
+          </View>
+        </View>
+      )
+    }
+    else {
+      return (
+        <View style={{ flexDirection: 'row' }}>
+          <Text style={styles.header}>{first.title}</Text>
+        </View>
+      )
+    }
   }
   return (
     <ScrollView>
@@ -291,7 +369,7 @@ export const LineUpScreen = ({ navigation }) => {
                 key={i}
                 title={
                   <View>
-                    {lineup_title(first.title)}
+                    {lineup_title(first)}
                     {
                       first.data.map((second, j) => (
                         <ListItem
