@@ -88,7 +88,7 @@ export const RecordScreen = ({ navigation }) => {
                             key={j}
                             title={
                               <View style={styles.subtitleView}>
-                                <Text style={[styles.title, { color: '#0000CC' }]}>10min</Text>
+                                <Text style={[styles.title, { color: '#0000CC' }]}>{d.total_time}</Text>
                                 <Text style={[styles.title, { color: '#5500FF' }]}>{d.item}</Text>
                                 <Text style={[styles.title, { color: '#9900FF' }]}>{d.group}</Text>
                                 <Text style={[styles.title, { color: '#FF00FF' }]}>{d.times}</Text>

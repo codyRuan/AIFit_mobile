@@ -114,25 +114,8 @@ export const LineUpDetails = ({ navigation, route }) => {
             />
           </View>
         </View>
-        {/* <View style={{ paddingLeft: 70, paddingTop: 65 }}>
-          <View style={{ width: 200 }}>
-            <Input
-              placeholder='EX 6'
-              label='次數'
-              onChangeText={text => setTimes(text)}
-              value={Times}
-            />
-          </View>
-        </View>
-        <View style={{ paddingLeft: 70, paddingTop: 40 }}>
-          <View style={{ width: 200 }}>
-            <Input
-              placeholder='EX 6'
-              label='組數'
-              onChangeText={text => setGroup(text)}
-              value={Group}
-            /></View>
-        </View> */}
+
+
         <View style={{ paddingTop: 30 }}>
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ fontSize: 30 }}>第{Group}組重量20LBS的次數</Text>
