@@ -169,7 +169,44 @@ export const LineUpScreen = ({ navigation }) => {
   useInterval(() => {
     get_Qstatus()
   }, 1000);
+  useEffect(() => {
+    timmmer()
+  }, []);
+  async function timmmer() {
+    var ws = new WebSocket('wss://ncufit.tk/wss/chat/mech1/');
+    var id = await AsyncStorage.getItem('@UserStorage:user_id')
+    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
 
+    id = JSON.parse(id)
+    uuid = JSON.parse(uuid)
+    ws.onopen = () => {
+      // connection opened
+      let msg = {
+        "message": "clock",
+        "part": "none",
+        "sid": id
+      };
+      ws.send(JSON.stringify(msg)); // send a message
+    };
+
+    ws.onmessage = (e) => {
+      // a message was received
+      console.log(e.data);
+      console.log(typeof(JSON.parse(e.data).sid));
+      setTimerIsOn(JSON.parse(e.data).sid)
+    };
+
+    ws.onerror = (e) => {
+      // an error occurred
+      console.log(e.message);
+    };
+
+    ws.onclose = (e) => {
+      // connection closed
+      console.log(e.code, e.reason);
+    };
+  }
+  
   async function get_Qstatus() {
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
@@ -321,7 +358,7 @@ export const LineUpScreen = ({ navigation }) => {
       );
     }
   }
-  const lineup_title = (first) => {
+  const lineup_title = (first, t) => {
 
     var cd = parseInt(JSON.parse(JSON.stringify(first.data[0].countdown)), 10)
     var pd = parseInt(JSON.parse(JSON.stringify(first.data[0].precedence)), 10)
@@ -331,8 +368,9 @@ export const LineUpScreen = ({ navigation }) => {
         <View style={{ flexDirection: 'row' }}>
           <Text style={styles.header}>{first.title}</Text>
           <View style={{ paddingLeft: 180 }}>
-            <CountDown
-              until={cd}
+            <Text>{t}秒</Text>
+            {/* <CountDown
+              until={t}
               size={15}
               // onFinish={() =>  alert(item, '你已被移出隊伍', [{ text: "ok", style: "cancel" }])}
               digitStyle={{ backgroundColor: '#FFF' }}
@@ -340,7 +378,7 @@ export const LineUpScreen = ({ navigation }) => {
               timeToShow={['M', 'S']}
               timeLabels={{ m: null, s: null }}
               showSeparator
-            />
+            /> */}
           </View>
         </View>
       )
@@ -363,7 +401,7 @@ export const LineUpScreen = ({ navigation }) => {
                 key={i}
                 title={
                   <View>
-                    {lineup_title(first)}
+                    {lineup_title(first,TimerIsOn)}
                     {
                       first.data.map((second, j) => (
                         <ListItem
