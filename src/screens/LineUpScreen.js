@@ -189,8 +189,8 @@ export const QRCodeScreen = ({ navigation, route }) => {
 
     ws.onmessage = (e) => {
       // a message was received
-      console.log(e.data);
-      console.log(typeof(JSON.parse(e.data).sid));
+      // console.log(e.data);
+      // console.log(typeof(JSON.parse(e.data).sid));
       if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw&timer')
         setTimerIsOn(JSON.parse(e.data).part.timer)
         setQRCodeUrl(JSON.parse(e.data).part.uid)

@@ -9,7 +9,7 @@ const URI = 'https://portal3g.ncu.edu.tw/oauth2/authorization?type=web_server&cl
 const REDIRECT_URI = 'https://ncufit.tk/oauth/callback/';
 
 let user_info
-
+console.disableYellowBox = true;
 _retrieveDataglobal = async (key) => {
   try {
     const value = await AsyncStorage.getItem(key);
