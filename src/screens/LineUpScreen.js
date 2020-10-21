@@ -162,6 +162,16 @@ export const LineUpDetails = ({ navigation, route }) => {
   )
 }
 
+// export const LineUpDetails = ({ navigation, route }) => {
+//   return (
+
+    
+//   )
+// }
+
+
+
+
 export const LineUpScreen = ({ navigation }) => {
   const [Qstatus, setQstatus] = useState(null)
   const [isLoading, setLoading] = useState(true);
@@ -173,7 +183,7 @@ export const LineUpScreen = ({ navigation }) => {
     timmmer()
   }, []);
   async function timmmer() {
-    var ws = new WebSocket('wss://ncufit.tk/wss/chat/mech1/');
+    var ws = new WebSocket('wss://ncufit.tk/wss/ex/mech1/');
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
     var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
 
@@ -193,7 +203,8 @@ export const LineUpScreen = ({ navigation }) => {
       // a message was received
       console.log(e.data);
       console.log(typeof(JSON.parse(e.data).sid));
-      setTimerIsOn(JSON.parse(e.data).sid)
+      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'timer')
+        setTimerIsOn(JSON.parse(e.data).part)
     };
 
     ws.onerror = (e) => {
@@ -369,16 +380,6 @@ export const LineUpScreen = ({ navigation }) => {
           <Text style={styles.header}>{first.title}</Text>
           <View style={{ paddingLeft: 180 }}>
             <Text>{t}秒</Text>
-            {/* <CountDown
-              until={t}
-              size={15}
-              // onFinish={() =>  alert(item, '你已被移出隊伍', [{ text: "ok", style: "cancel" }])}
-              digitStyle={{ backgroundColor: '#FFF' }}
-              // digitTxtStyle={{ color: '#1CC625' }}
-              timeToShow={['M', 'S']}
-              timeLabels={{ m: null, s: null }}
-              showSeparator
-            /> */}
           </View>
         </View>
       )
