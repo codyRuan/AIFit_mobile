@@ -4,7 +4,7 @@ import {
   SectionList, FlatList, ActivityIndicator, Image, TouchableOpacity, Alert, ScrollView
 } from "react-native";
 import AsyncStorage from '@react-native-community/async-storage';
-import CountDown from 'react-native-countdown-component';
+import QRCode from 'react-native-qrcode-svg';
 import { Button, ListItem, Input } from 'react-native-elements'
 function useInterval(callback, delay) {
   const savedCallback = useRef();
@@ -162,12 +162,74 @@ export const LineUpDetails = ({ navigation, route }) => {
   )
 }
 
-// export const LineUpDetails = ({ navigation, route }) => {
-//   return (
 
+export const QRCodeScreen = ({ navigation, route }) => {
+  const [TimerIsOn, setTimerIsOn] = useState(false);
+  const [QRCodeUrl, setQRCodeUrl] = useState(null);
+  const [isLoading, setLoading] = useState(true);
+  useEffect(() => {
+    get_QRCode()
+  }, []);
+  async function get_QRCode() {
+    var ws = new WebSocket('wss://ncufit.tk/wss/ex/mech1/');
+    var id = await AsyncStorage.getItem('@UserStorage:user_id')
+    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
+
+    id = JSON.parse(id)
+    uuid = JSON.parse(uuid)
+    ws.onopen = () => {
+      // connection opened
+      let msg = {
+        "message": "clock",
+        "part": "none",
+        "sid": id
+      };
+      ws.send(JSON.stringify(msg)); // send a message
+    };
+
+    ws.onmessage = (e) => {
+      // a message was received
+      console.log(e.data);
+      console.log(typeof(JSON.parse(e.data).sid));
+      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw&timer')
+        setTimerIsOn(JSON.parse(e.data).part.timer)
+        setQRCodeUrl(JSON.parse(e.data).part.uid)
+        setLoading(false)
+      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw')
+        setQRCodeUrl(JSON.parse(e.data).part)
+        setLoading(false)
+        
+    };
+
+    ws.onerror = (e) => {
+      // an error occurred
+      console.log(e.message);
+    };
+
+    ws.onclose = (e) => {
+      // connection closed
+      console.log(e.code, e.reason);
+    };
+  }
+  return (
+    <ScrollView>
+      {isLoading ? <ActivityIndicator /> : (
+        <View >
+        <QRCode
+        value={QRCodeUrl}
+        size={350}
+        />
+        <View style={{ paddingLeft: 180 }}>
+          <Text>{TimerIsOn}</Text>
+        </View>
+      </View>
+      )}
+    </ScrollView>
     
-//   )
-// }
+    
+
+  )
+}
 
 
 
@@ -176,12 +238,14 @@ export const LineUpScreen = ({ navigation }) => {
   const [Qstatus, setQstatus] = useState(null)
   const [isLoading, setLoading] = useState(true);
   const [TimerIsOn, setTimerIsOn] = useState(false);
+  const [QRCodeUrl, setQRCodeUrl] = useState(null);
   useInterval(() => {
     get_Qstatus()
   }, 1000);
   useEffect(() => {
     timmmer()
   }, []);
+
   async function timmmer() {
     var ws = new WebSocket('wss://ncufit.tk/wss/ex/mech1/');
     var id = await AsyncStorage.getItem('@UserStorage:user_id')
@@ -203,8 +267,14 @@ export const LineUpScreen = ({ navigation }) => {
       // a message was received
       console.log(e.data);
       console.log(typeof(JSON.parse(e.data).sid));
+      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw&timer')
+        setTimerIsOn(JSON.parse(e.data).part.timer)
+        setQRCodeUrl(JSON.parse(e.data).part.uid)
       if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'timer')
         setTimerIsOn(JSON.parse(e.data).part)
+      else if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw')
+        setQRCodeUrl(JSON.parse(e.data).part)
+        
     };
 
     ws.onerror = (e) => {
@@ -245,7 +315,8 @@ export const LineUpScreen = ({ navigation }) => {
 
       }).done()
   }
-  const LineUpAction = (data) => {
+
+  const LineUpAction = (data,qrurl,time) => {
     async function join_the_queue(part) {
       var id = await AsyncStorage.getItem('@UserStorage:user_id')
       var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
@@ -271,6 +342,7 @@ export const LineUpScreen = ({ navigation }) => {
           Alert.alert(' ', res.message, [{ text: 'OK' },])
         }).done()
     }
+
     async function leave_the_queue(part) {
       var id = await AsyncStorage.getItem('@UserStorage:user_id')
       var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
@@ -296,6 +368,7 @@ export const LineUpScreen = ({ navigation }) => {
           Alert.alert(' ', res.message, [{ text: 'OK' },])
         }).done()
     }
+
     async function start_workout(part) {
       var id = await AsyncStorage.getItem('@UserStorage:user_id')
       var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
@@ -323,20 +396,22 @@ export const LineUpScreen = ({ navigation }) => {
     var item = JSON.parse(JSON.stringify(data.item))
     var amount = JSON.parse(JSON.stringify(data.amount))
     var precedence = JSON.parse(JSON.stringify(data.precedence))
-
+    var tppp = [qrurl, time]
+    console.log(tppp)
     if (data.precedence == 1) {
-      Alert.alert(
-        item,
-        "到你了!",
-        [
-          { text: "開始訓練", onPress: () => { navigation.push('LineUpDetails', { data }), start_workout(item) } },
-          {
-            text: "離開列隊",
-            onPress: () => leave_the_queue(item),
-            style: "cancel"
-          }
-        ],
-      );
+      navigation.push('QRCodeScreen')
+      // Alert.alert(
+      //   item,
+      //   "到你了!",
+      //   [
+      //     { text: "開始訓練", onPress: () => { navigation.push('LineUpDetails', { data }), start_workout(item) } },
+      //     {
+      //       text: "離開列隊",
+      //       onPress: () => leave_the_queue(item),
+      //       style: "cancel"
+      //     }
+      //   ],
+      // );
     }
 
     else if (data.precedence != -1 && data.precedence != 0) {
@@ -374,7 +449,7 @@ export const LineUpScreen = ({ navigation }) => {
     var cd = parseInt(JSON.parse(JSON.stringify(first.data[0].countdown)), 10)
     var pd = parseInt(JSON.parse(JSON.stringify(first.data[0].precedence)), 10)
     var item = JSON.parse(JSON.stringify(first.data[0].item))
-    if (pd == 1) {
+    if (pd == 1 && t != 0) {
       return (
         <View style={{ flexDirection: 'row' }}>
           <Text style={styles.header}>{first.title}</Text>
@@ -392,6 +467,8 @@ export const LineUpScreen = ({ navigation }) => {
       )
     }
   }
+
+
   return (
     <ScrollView>
       {isLoading ? <ActivityIndicator /> : (
@@ -411,7 +488,7 @@ export const LineUpScreen = ({ navigation }) => {
                             <View style={styles.subtitleView}>
                               <Text style={[styles.font, { color: '#000080' }]}>{second.amount}人</Text>
 
-                              <TouchableOpacity style={[styles.title]} onPress={() => { LineUpAction(second) }}  >
+                              <TouchableOpacity style={[styles.title]} onPress={() => { LineUpAction(second,QRCodeUrl,TimerIsOn) }}  >
                                 <Text style={[styles.font, { color: '#000080' }]}>{second.user_qstatus}</Text>
                               </TouchableOpacity>
                             </View>

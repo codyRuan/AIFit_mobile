@@ -16,7 +16,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from "react-native-vector-icons/Ionicons"
 import { LoginScreen, Splash, success } from './src/screens/LoginScreen';
-import { LineUpScreen, LineUpDetails } from './src/screens/LineUpScreen';
+import { LineUpScreen, LineUpDetails, QRCodeScreen } from './src/screens/LineUpScreen';
 import { RecordScreen } from './src/screens/RecordScreen';
 import { NotificationScreen } from './src/screens/NotificationScreen';
 import { SocietyScreen } from './src/screens/SocietyScreen';
@@ -112,6 +112,7 @@ const LineUpStackScreen = () => (
   <LineUpStack.Navigator headerMode="none" >
     <LineUpStack.Screen name="LineUp" component={LineUpScreen} />
     <LineUpStack.Screen name="LineUpDetails" component={LineUpDetails} />
+    <LineUpStack.Screen name="QRCodeScreen" component={QRCodeScreen} />
   </LineUpStack.Navigator>
 );
 const ProfileStack = createStackNavigator();
