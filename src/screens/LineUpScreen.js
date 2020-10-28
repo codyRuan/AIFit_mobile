@@ -164,66 +164,44 @@ export const LineUpDetails = ({ navigation, route }) => {
 
 
 export const QRCodeScreen = ({ navigation, route }) => {
-  const [TimerIsOn, setTimerIsOn] = useState(false);
+  const [TimerIsOn, setTimerIsOn] = useState(null);
   const [QRCodeUrl, setQRCodeUrl] = useState(null);
   const [isLoading, setLoading] = useState(true);
-  useEffect(() => {
-    get_QRCode()
-  }, []);
-  async function get_QRCode() {
-    var ws = new WebSocket('wss://ncufit.tk/wss/ex/mech1/');
-    var id = await AsyncStorage.getItem('@UserStorage:user_id')
-    var uuid = await AsyncStorage.getItem('@UserStorage:uuid')
-
-    id = JSON.parse(id)
-    uuid = JSON.parse(uuid)
-    ws.onopen = () => {
-      // connection opened
-      let msg = {
-        "message": "clock",
-        "part": "none",
-        "sid": id
-      };
-      ws.send(JSON.stringify(msg)); // send a message
-    };
-
-    ws.onmessage = (e) => {
-      // a message was received
-      console.log(e.data);
-      console.log(typeof(JSON.parse(e.data).sid));
-      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw&timer')
-        setTimerIsOn(JSON.parse(e.data).part.timer)
-        setQRCodeUrl(JSON.parse(e.data).part.uid)
-        setLoading(false)
-      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw')
-        setQRCodeUrl(JSON.parse(e.data).part)
-        setLoading(false)
-        
-    };
-
-    ws.onerror = (e) => {
-      // an error occurred
-      console.log(e.message);
-    };
-
-    ws.onclose = (e) => {
-      // connection closed
-      console.log(e.code, e.reason);
-    };
-  }
+  useInterval(() => {
+    setTimerIsOn(global.g_timer)
+  }, 500);
+  useEffect(()=>{
+    if(global.g_timer==0){
+      Alert.alert(' ', "removed", [{ text: 'OK', onPress: () => { navigation.pop() } },])
+    }
+    else if(global.g_timer==-9){
+      Alert.alert(' ', "驗證成功，可以開始運動了", [{ text: 'OK', onPress: () => { navigation.pop() } },])
+    }
+  },[global.g_timer]);
+  
+  
   return (
     <ScrollView>
-      {isLoading ? <ActivityIndicator /> : (
+      {/* {isLoading ? <ActivityIndicator /> : (
         <View >
         <QRCode
-        value={QRCodeUrl}
+        value={route.params.tppp.qrurl}
         size={350}
         />
         <View style={{ paddingLeft: 180 }}>
           <Text>{TimerIsOn}</Text>
         </View>
       </View>
-      )}
+      )} */}
+      <View >
+        <QRCode
+        value={route.params.tppp.qrurl}
+        size={350}
+        />
+        <View style={{ paddingLeft: 180 }}>
+          <Text>{TimerIsOn}</Text>
+        </View>
+      </View>
     </ScrollView>
     
     
@@ -267,11 +245,16 @@ export const LineUpScreen = ({ navigation }) => {
       // a message was received
       console.log(e.data);
       console.log(typeof(JSON.parse(e.data).sid));
-      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw&timer')
+      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw&timer'){
         setTimerIsOn(JSON.parse(e.data).part.timer)
         setQRCodeUrl(JSON.parse(e.data).part.uid)
-      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'timer')
-        setTimerIsOn(JSON.parse(e.data).part)
+        global.g_timer = JSON.parse(e.data).part.timer
+        
+      }
+      if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'start_workout'){
+        setTimerIsOn(0)
+        global.g_timer = JSON.parse(e.data).part.countdown
+      }
       else if (JSON.parse(e.data).sid == id && JSON.parse(e.data).message == 'QRcode_raw')
         setQRCodeUrl(JSON.parse(e.data).part)
         
@@ -396,24 +379,16 @@ export const LineUpScreen = ({ navigation }) => {
     var item = JSON.parse(JSON.stringify(data.item))
     var amount = JSON.parse(JSON.stringify(data.amount))
     var precedence = JSON.parse(JSON.stringify(data.precedence))
-    var tppp = [qrurl, time]
-    console.log(tppp)
-    if (data.precedence == 1) {
-      navigation.push('QRCodeScreen')
-      // Alert.alert(
-      //   item,
-      //   "到你了!",
-      //   [
-      //     { text: "開始訓練", onPress: () => { navigation.push('LineUpDetails', { data }), start_workout(item) } },
-      //     {
-      //       text: "離開列隊",
-      //       onPress: () => leave_the_queue(item),
-      //       style: "cancel"
-      //     }
-      //   ],
-      // );
+    var tppp = {"qrurl":qrurl, "time":time,"countdown":data.countdown}
+    
+    if (data.precedence == 1 ) {
+      if(data.countdown != -1){
+        navigation.push('QRCodeScreen', { tppp })
+      }
+      else{
+        navigation.push('LineUpDetails', { data })
+      }
     }
-
     else if (data.precedence != -1 && data.precedence != 0) {
       Alert.alert(
         item,
