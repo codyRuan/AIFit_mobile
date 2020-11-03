@@ -175,6 +175,7 @@ export const QRCodeScreen = ({ navigation, route }) => {
       Alert.alert(' ', "removed", [{ text: 'OK', onPress: () => { navigation.pop() } },])
     }
     else if(global.g_timer==-9){
+      setTimerIsOn(null)
       Alert.alert(' ', "驗證成功，可以開始運動了", [{ text: 'OK', onPress: () => { navigation.pop() } },])
     }
   },[global.g_timer]);
@@ -292,7 +293,9 @@ export const LineUpScreen = ({ navigation }) => {
     })
       .then((response) => response.json())
       .then((responseData) => {
-        //console.log(JSON.stringify(responseData))
+        // for (var i=0; i < Object.keys(responseData).length; i++) {
+        //   tmp = {str(responseData[i].title):0}
+        // }
         setQstatus(responseData);
         setLoading(false)
 
