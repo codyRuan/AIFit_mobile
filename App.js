@@ -45,7 +45,7 @@ const TabsScreen = () => (
             ? 'ios-notifications'
             : 'ios-notifications-outline';
         }
-        else if (route.name === 'Society') {
+        else if (route.name === 'PoseDetect') {
           iconName = focused
             ? 'ios-people'
             : 'ios-people';
@@ -63,7 +63,7 @@ const TabsScreen = () => (
     <Tabs.Screen name="LineUp" component={LineUpStackScreen} />
     <Tabs.Screen name="Record" component={RecordScreen} />
     <Tabs.Screen name="Notification" component={NotificationScreen} />
-    <Tabs.Screen name="Society" component={SocietyScreen} />
+    <Tabs.Screen name="PoseDetect" component={SocietyScreen} />
   </Tabs.Navigator>
 )
 const HomeStack = createStackNavigator();
